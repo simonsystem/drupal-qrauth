@@ -1,5 +1,6 @@
-name = External Authentication
-description = Authenticate users against an external service.
+name = Qr Code Authentication
+description = Authenticate already authorized users by qr-code.
 package = Authentication
 core = "7.x"
 version = "7.x-1.0"
+project = "qrauth"
