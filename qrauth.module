@@ -53,7 +53,7 @@ function social_site_schema() {
                 'default' => 0,
             )
         ),
-        'primary key' => array('type'),
+        'primary key' => array('qrcode'),
         'foreign keys' => array(
             'qrauth-authenticator' => array(
                 'table' => 'users',
