@@ -74,7 +74,8 @@ function generateQrCode( )
     db_insert('qrauth_qrcode')
         ->fields(array(
             'qrcode' => $qrcode,
-            'uid' => 0
+            'uid' => 0,
+            'deadline' => REQUEST_TIME
         ))
         ->execute();
     return $qrcode;

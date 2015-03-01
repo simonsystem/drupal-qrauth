@@ -37,7 +37,14 @@ function qrauth_schema() {
                 'type' => 'int',
                 'not null' => TRUE,
                 'default' => 0,
-            )
+            ),
+            'changed' => array(
+                'deadline' => 'The dealine until the qrcod wil be deleted.',
+                'type' => 'int',
+                'not null' => TRUE,
+                'default' => 0,
+            ),
+
         ),
         'primary key' => array('qrcode'),
         'foreign keys' => array(
