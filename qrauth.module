@@ -75,7 +75,7 @@ function generateQrCode( )
         ->fields(array(
             'qrcode' => $qrcode,
             'uid' => 0,
-            'deadline' => REQUEST_TIME
+            'deadline' => REQUEST_TIME + 5 * 60,
         ))
         ->execute();
     return $qrcode;
