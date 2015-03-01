@@ -14,55 +14,7 @@ function qrauth_help( $path, $arg )
     }
 }
 
-/**
-* Implementation of hook_install().
-*/
-function qrauth_install() {
-// Use schema API to create database table.
-drupal_install_schema('qrauth_qrcode');
-}
 
-
-
-/**
-* Implementation of hook_uninstall().
-*/
-function qrauth_uninstall() {
-// Remove tables.
-drupal_uninstall_schema('qrauth_qrcode');
-}
-
-
-/**
-* Implementation of hook_schema().
-*/
-function social_site_schema() {
-    $schema['qrauth_qrcode'] = array(
-        'description' => t('Stores qrcodes and uids of the qrauth module.'),
-        'fields' => array(
-            'qrcode' => array(
-                'description' => 'The primary qrcode.',
-                'type' => 'varchar',
-                'length' => 32,
-                'not null' => TRUE
-            ),
-            'uid' => array(
-                'description' => 'The {users}.uid that authentication this qrcode; initially, this is null',
-                'type' => 'int',
-                'not null' => TRUE,
-                'default' => 0,
-            )
-        ),
-        'primary key' => array('qrcode'),
-        'foreign keys' => array(
-            'qrauth-authenticator' => array(
-                'table' => 'users',
-                'columns' => array('uid' => 'uid'),
-            )
-        )
-    );
-    return $schema;
-}
 
 /**
  * Implement hook_form_alter() to change the behaviour of the login form.
@@ -75,7 +27,6 @@ function social_site_schema() {
 
 function qrauth_form_alter(&$form, $form_state, $form_id)
 {
-  print_r("kas");
   if ($form_id == 'user_login_block' || $form_id == 'user_login') {
     unset($form['links']);
     $form['#validate'] = array( 'user_login_name_validate', 'qrauth_login_validate', 'user_login_final_validate' );
@@ -119,6 +70,12 @@ function qrauth_login_validate( $form, &$form_state )
  */
 function generateQrCode( )
 {
-    $qrcode = substr(base64(mt_rand()), 0, 15);
+    $qrcode = base64_encode(drupal_random_bytes(16));
+    db_insert('qrauth_qrcode')
+        ->fields(array(
+            'qrcode' => $qrcode,
+            'uid' => 0
+        ))
+        ->execute();
     return $qrcode;
 }
