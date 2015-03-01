@@ -7,9 +7,6 @@ function qrauth_help( $path, $arg )
 {
     switch ( $path )
     {
-        case 'qrauth':
-            // Help text for the simple page registered for this path.
-            return( '<p>' . t('This module allows users who login with e-mail addresses to authenticate off an external system.') . '</p>' );
         case 'admin/help#qrauth':
             return( '<p>' . t('This module allows users who login with e-mail addresses to authenticate off an external system.') . '</p>' );
     }
@@ -48,10 +45,10 @@ function qrauth_login_validate( $form, &$form_state )
 
     if ( $qrcode ) {
         $uid = db_select('qrauth_qrcode', 'qr')
+            ->fields('qr')
             ->condition('qrcode', $qrcode)
-            ->fields('uid')
             ->execute()
-            ->fetchField('uid');
+            ->fetchAssoc()['uid'];
         if ($uid) {
             // Log user in.
             $form_state['uid'] = $uid;
@@ -71,7 +68,7 @@ function qrauth_login_validate( $form, &$form_state )
  */
 function generateQrCode( )
 {
-    $qrcode = base64_encode(drupal_random_bytes(16));
+    $qrcode = base64_encode(drupal_random_bytes(12));
     db_insert('qrauth_qrcode')
         ->fields(array(
             'qrcode' => $qrcode,
@@ -101,22 +98,6 @@ function qrauth_permission() {
 }
 
 /**
- * Constructs a descriptive page.
- *
- * Our menu maps this function to the path 'examples/page_example'.
- */
-function qrauth_description() {
-  return array(
-    '#markup' =>
-    t('<p>The page_example provides two pages, "simple" and "arguments".</p><p>The <a href="@simple_link">simple page</a> just returns a renderable array for display.</p><p>The <a href="@arguments_link">arguments page</a> takes two arguments and displays them, as in @arguments_link</p>',
-      array(
-        '@arguments_link' => url('examples/page_example/arguments/23/56', array('absolute' => TRUE)),
-      )
-    ),
-  );
-}
-
-/**
  * A more complex page callback that takes arguments.
  *
  * This callback is mapped to the path 'examples/page_example/arguments/%/%'.
@@ -134,16 +115,28 @@ function qrauth_description() {
  * Consult @link http://drupal.org/node/930760 Render Arrays documentation
  * @endlink for details.
  */
-function qrauth_arguments($first) {
-  // Make sure you don't trust the URL to be safe! Always check for exploits.
-  if (!is_numeric($first)) {
+function qrauth_arguments($qrcode) {
+  global $user;
+  $uid = db_select('qrauth_qrcode', 'qr')
+      ->fields('qr')
+      ->condition('qrcode', $qrcode)
+      ->execute()
+      ->fetchAssoc()['uid'];
+
+  if ($uid === '0') {
+    db_update('qrauth_qrcode')
+      ->condition('qrcode', $qrcode)
+      ->fields(array(
+        'uid' => $user->uid,
+      ))
+     ->execute();
+  }
+  else {
     // We will just show a standard "access denied" page in this case.
     drupal_access_denied();
     // We actually don't get here.
     return;
   }
-
-  $list[] = t("First number was @number.", array('@number' => $first));
 
   $render_array['qrauth_arguments'] = array(
     // The theme function to apply to the #items.
@@ -188,15 +181,6 @@ function qrauth_arguments($first) {
  * @see menu_example
  */
 function qrauth_menu() {
-  // This is the minimum information you can provide for a menu item. This menu
-  // item will be created in the default menu, usually Navigation.
-  $items['qrauth'] = array(
-    'title' => 'Page Example',
-    'page callback' => 'qrauth_description',
-    'access callback' => TRUE,
-    'expanded' => TRUE,
-  );
-
   // By using the MENU_CALLBACK type, we can register the callback for this
   // path without the item appearing in the menu; the admin cannot enable the
   // item in the menu, either.

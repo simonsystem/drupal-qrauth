@@ -4,8 +4,30 @@
 * Implementation of hook_install().
 */
 function qrauth_install() {
-// Use schema API to create database table.
-drupal_install_schema('qrauth_qrcode');
+
+  // Use schema API to create database table.
+  drupal_install_schema('qrauth_qrcode');
+
+
+  $t = get_t();
+
+  // Define the node type.
+  $node_example = array(
+    'type' => 'qrauth_authenticator',
+    'name' => $t('Qr Code atuhenticator'),
+    'base' => 'node_content',
+    'description' => $t('This is an example node type with a few fields.'),
+    'body_label' => $t('Example Description')
+  );
+
+  // Complete the node type definition by setting any defaults not explicitly
+  // declared above.
+  // http://api.drupal.org/api/function/node_type_set_defaults/7
+  $content_type = node_type_set_defaults($node_example);
+  node_add_body_field($content_type);
+
+  // Save the content type
+  node_type_save($content_type);
 }
 
 
