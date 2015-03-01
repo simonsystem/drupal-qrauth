@@ -38,8 +38,8 @@ function qrauth_schema() {
                 'not null' => TRUE,
                 'default' => 0,
             ),
-            'changed' => array(
-                'deadline' => 'The dealine until the qrcod wil be deleted.',
+            'deadline' => array(
+                'description' => 'The dealine until the qrcod wil be deleted.',
                 'type' => 'int',
                 'not null' => TRUE,
                 'default' => 0,
