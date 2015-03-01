@@ -7,7 +7,7 @@ function qrauth_help( $path, $arg )
 {
     switch ( $path )
     {
-        case 'examples/page_example/simple':
+        case 'qrauth':
             // Help text for the simple page registered for this path.
             return( '<p>' . t('This module allows users who login with e-mail addresses to authenticate off an external system.') . '</p>' );
         case 'admin/help#qrauth':
@@ -91,7 +91,7 @@ function generateQrCode( )
  * This ensures that they are available to enable on the user role
  * administration pages.
  */
-function page_example_permission() {
+function qrauth_permission() {
   return array(
     'access arguments page' => array(
       'title' => t('Access page with arguments'),
