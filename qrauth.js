@@ -8,28 +8,27 @@ jQuery(function($){
 
     var $input = $("input[name=qrauth_qrcode]");
     var $form = $input.closest("form");
+
     var qrcode = $input.attr("value");
-    var url = qualifyURL("/qrauth/" + qrcode);
+    var authUrl = qualifyURL("/qrauth/" + qrcode);
+    var waitUrl = qualifyURL("/qrwait/" + qrcode);
 
     $("<div>").appendTo($form).qrcode({
-        text: url,
+        text: authUrl,
     }).find("canvas:first-child").css({
-        "width": "100%",
+        width: "100%",
+        maxWidth: 200,
+
     });
 
-    var action = $form.attr("action");
-    var url = qualifyURL(action);
-
-    $form = $form.clone()
-    $form.find("input[name=name], input[name=pass]").remove();
-    var data = $form.serialize();
-
-    function testForVerification() {
-        $.post(action, data, function(){
-            setTimeout(testForVerification, 2000);
+    setTimeout(function cycle() {
+        $.getJSON(waitUrl, function(data) {
+            if (data && data.authenticated) {
+                console.log("qr-authenticated by uid "+ data.uid);
+                $form.submit();
+            } else {
+                setTimeout(cycle, 2000);
+            }
         });
-
-    }
-
-    setTimeout(testForVerification, 2000);
+    }, 2000);
 });
