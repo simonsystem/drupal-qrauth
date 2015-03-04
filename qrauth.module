@@ -58,7 +58,7 @@ function db_create_qrcode()
     ->fields(array(
       'qrcode' => $qrcode,
       'uid' => 0,
-      'deadline' => REQUEST_TIME + 5 * 60,
+      'deadline' => REQUEST_TIME + 1* 60,
     ))
     ->execute();
   return $qrcode;
@@ -93,10 +93,10 @@ function db_delete_deprecated_qrcodes()
 
 
 /**
- * Get the uid of the user who authenticated this request. 
+ * Get this request as assoc. 
  *
  * @param $qrcode which indentifies this request
- * @return users uid
+ * @return array which holds the information
  */
 function db_get($qrcode)
 {
@@ -139,12 +139,10 @@ function qrauth_permission()
 }
 
 /**
- * A more complex page callback that takes arguments.
+ * The page callback implementing the authentication.
  *
- * This callback is mapped to the path 'examples/page_example/arguments/%/%'.
+ * This callback is mapped to the path 'qrauth/%'.
  *
- * Consult @link http://drupal.org/node/930760 Render Arrays documentation
- * @endlink for details.
  */
 function qrauth_authenticate($qrcode)
 {
@@ -168,12 +166,10 @@ function qrauth_authenticate($qrcode)
 }
 
 /**
- * A more complex page callback that takes arguments.
+ * The page callback implementing waiting.
  *
- * This callback is mapped to the path 'examples/page_example/arguments/%/%'.
+ * This callback is mapped to the path 'qrwait/%'.
  *
- * Consult @link http://drupal.org/node/930760 Render Arrays documentation
- * @endlink for details.
  */
 function qrauth_wait($qrcode)
 {
@@ -192,12 +188,18 @@ function qrauth_wait($qrcode)
     ));
     return;
   }
-  else {
-    if ($deadline < REQUEST_TIME) {
-      db_delete_qrcode($qrcode);
-    }
+  elseif ($deadline < REQUEST_TIME) {
+    db_delete_qrcode($qrcode);
     drupal_json_output(array(
       'authenticated' => 0,
+      'deleted' => 1,
+    ));
+    return;
+  }
+  else {
+    drupal_json_output(array(
+      'authenticated' => 0,
+      'deleted' => 0,
     ));
     return;
   }
